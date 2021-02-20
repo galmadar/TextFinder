@@ -1,6 +1,6 @@
 package com.galmadar.matchers;
 
-import com.galmadar.mainFinder.FindFinished;
+import com.galmadar.textFinder.TextSearchFinished;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,34 +13,39 @@ public class MatcherManager implements MatchersFinished {
     private final Logger logger = LogManager.getLogger(getClass());
 
     private final List<String> stringsToFind;
-    private final FindFinished findFinished;
+    private final TextSearchFinished textSearchFinished;
     private final Map<Integer, Matcher> matchers = new HashMap<>();
-    private final List<WordsAndLocations> allWordsAndLocations = new ArrayList<>();
+    private final List<WordsLocationsCollection> allWordsLocationCollections = new ArrayList<>();
     private boolean finishedText = false;
 
-    public MatcherManager(List<String> stringsToFind, FindFinished findFinished) {
+    public MatcherManager(List<String> stringsToFind, TextSearchFinished textSearchFinished) {
         this.stringsToFind = stringsToFind;
-        this.findFinished = findFinished;
+        this.textSearchFinished = textSearchFinished;
     }
 
-    public void findWords(Integer offset, StringBuilder partOfText) {
-        logger.info("Start finding words from offset {}", offset);
+    public void startNewMatcher(int offset, StringBuilder partOfText) {
+        logger.debug("Start finding words from offset {}", offset);
         Matcher newMatcher = new Matcher(offset, partOfText, stringsToFind, this);
         matchers.put(offset, newMatcher);
-        Thread t = new Thread(newMatcher);
-        t.start();
+        logger.debug("Start new matcher (currently there are {} matchers)", matchers.size());
+        new Thread(newMatcher).start();
     }
 
-    public void finishedText() {
+    public void notifyIterateOverFileFinished() {
+        logger.debug("Notified that Iterating over (big) file is DONE");
         this.finishedText = true;
     }
 
     @Override
-    public void handleFinished(WordsAndLocations wordsAndLocations, Integer lineOffset) {
-        allWordsAndLocations.add(wordsAndLocations);
+    public void handleFinished(WordsLocationsCollection wordsLocationsCollection, int lineOffset) {
+        logger.debug("Matcher of offset {} has finished and found {} words", lineOffset, wordsLocationsCollection.numberOfWords());
+        allWordsLocationCollections.add(wordsLocationsCollection);
+        logger.debug("Remove Matcher for 'lineOffset' {}", lineOffset);
         matchers.remove(lineOffset);
-        if (this.finishedText && matchers.size() <= 0) {
-            this.findFinished.finished(allWordsAndLocations);
+        logger.debug("Currently there are {} matchers", matchers.size());
+        if (finishedText && matchers.size() <= 0) {
+            logger.info("'finishedText' is true, and there are no matchers. Calling to 'handleSearchResults'");
+            textSearchFinished.handleSearchResults(allWordsLocationCollections);
         }
     }
 }

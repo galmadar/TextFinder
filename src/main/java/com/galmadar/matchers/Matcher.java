@@ -1,42 +1,54 @@
 package com.galmadar.matchers;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.List;
 
 public class Matcher implements Runnable {
+
+    private final Logger logger = LogManager.getLogger(getClass());
     private final StringBuilder strSearch;
-    private final Integer lineOffset;
+    private final int lineOffset;
     private final List<String> wordsToSearch;
     private final MatchersFinished matchersFinished;
-    private final WordsAndLocations wordsAndLocations = new WordsAndLocations();
+    private final WordsLocationsCollection wordsLocationsCollection = new WordsLocationsCollection();
 
-    public Matcher(Integer lineOffset, StringBuilder strSearch, List<String> wordsToSearch, MatchersFinished matchersFinished) {
+    public Matcher(int lineOffset, StringBuilder strSearch, List<String> wordsToSearch, MatchersFinished matchersFinished) {
         this.strSearch = strSearch;
         this.lineOffset = lineOffset;
         this.wordsToSearch = wordsToSearch;
         this.matchersFinished = matchersFinished;
+        logger.debug("Matcher Created for offset {}. Searching for {} words in {} characters", lineOffset, wordsToSearch.size(), strSearch.length());
     }
 
-    public WordsAndLocations startSearch() {
-        String[] split = this.strSearch.toString().split("\n");
+    public WordsLocationsCollection startSearch() {
+        String[] allLines = this.strSearch.toString().split("\n");
+        logger.debug("Matcher of offset {}, searching in {} lines", lineOffset, allLines.length);
 
-        for (Integer i = 0; i < split.length; i++) {
-            String line = split[i];
-            for (String toSearch : wordsToSearch) {
-                int indexOfWord = line.indexOf(toSearch);
-                if (indexOfWord >= 0) {
+        for (int i = 0; i < allLines.length; i++) {
+            String currentLine = allLines[i];
+            for (String currentWordToSearch : wordsToSearch) {
+                int indexOfWord = 0;
+                while ((indexOfWord = currentLine.indexOf(currentWordToSearch, indexOfWord)) >= 0) {
                     WordLocation wordLocation = new WordLocation(this.lineOffset + i, indexOfWord);
-                    wordsAndLocations.addLocationForWord(toSearch, wordLocation);
+                    wordsLocationsCollection.addLocationForWord(currentWordToSearch, wordLocation);
+                    indexOfWord++;
                 }
             }
         }
 
-        return wordsAndLocations;
+        logger.debug("found {} words", wordsLocationsCollection.numberOfWords());
+        return wordsLocationsCollection;
     }
 
     @Override
     public void run() {
-        WordsAndLocations wordsAndLocations = startSearch();
-        matchersFinished.handleFinished(wordsAndLocations, lineOffset);
+        logger.debug("Running Matcher for offset {}", lineOffset);
+        WordsLocationsCollection wordsLocationsCollection = startSearch();
+
+        logger.debug("Calling to 'handleFinished', for offset {}", lineOffset);
+        matchersFinished.handleFinished(wordsLocationsCollection, lineOffset);
     }
 }
 

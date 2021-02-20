@@ -1,25 +1,23 @@
 package com.galmadar.aggregator;
 
 import com.galmadar.matchers.WordLocation;
-import com.galmadar.matchers.WordsAndLocations;
+import com.galmadar.matchers.WordsLocationsCollection;
 
 import java.util.List;
 
 public class Aggregator {
-    private WordsAndLocations aggregatedWordsAndLocations = new WordsAndLocations();
+    private final WordsLocationsCollection aggregatedWordsLocationsCollection = new WordsLocationsCollection();
 
-    public void aggregateWords(List<WordsAndLocations> wordsWithLocations) {
+    public void aggregateWords(List<WordsLocationsCollection> wordsWithLocations) {
         wordsWithLocations.forEach(wordsAndLocations -> {
-            wordsAndLocations.mapOfWords.forEach((s, wordLocations) -> {
-                aggregatedWordsAndLocations.addLocationForWord(s, wordLocations);
-            });
+            wordsAndLocations.mapOfWords.forEach(aggregatedWordsLocationsCollection::addLocationForWord);
         });
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        aggregatedWordsAndLocations.mapOfWords.forEach((s, wordLocations) -> {
+        aggregatedWordsLocationsCollection.mapOfWords.forEach((s, wordLocations) -> {
             sb.append(String.format("%s --> ", s));
             sb.append("[");
             for (int i = 0; i < wordLocations.size(); i++) {
