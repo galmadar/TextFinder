@@ -1,4 +1,4 @@
-#TextFinder
+# TextFinder
 
 Java program to find specific strings in a large text.
 
