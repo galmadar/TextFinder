@@ -8,7 +8,7 @@ Inputs:
 
 Main Module:
 1. Reads the large text file and divide it into parts.
-2. Each part of the file "goes" into the `MatcherManger` which creates new `Matcher`. Each `Mathcer` starts to search on a separate thread.
+2. Each part of the file "goes" into the `MatcherManger` which creates new `Matcher`. Each `Mathcer` starts to search on a **separate THREAD**.
 3. After all of the `Matcher`s finished, the `Aggregator` "sum up" all the words and their locations on the large file.
 
 ![alt TextFinder Sketch](Readme/TextFinder.png)
