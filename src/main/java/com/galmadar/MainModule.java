@@ -15,9 +15,9 @@ public class MainModule {
             String bigTxtFile = MainModule.class.getResource("/big.txt").getFile();
             String stringsToFindFile = MainModule.class.getResource("/textsToFind.txt").getFile();
             int numberOfLinesPerMatcher = 5000;
-            logger.info("Looking for all words from file {}.", stringsToFindFile);
-            logger.info("Searching in {}.", bigTxtFile);
-            logger.info("Create Matcher for {} lines.", numberOfLinesPerMatcher);
+            logger.info("Looking for all words from file {}", stringsToFindFile);
+            logger.info("Searching in {}", bigTxtFile);
+            logger.info("Create Matcher for {} lines", numberOfLinesPerMatcher);
             TextFinder tf = new TextFinder(bigTxtFile, stringsToFindFile, numberOfLinesPerMatcher);
             tf.startWork();
         } catch (IOException e) {
