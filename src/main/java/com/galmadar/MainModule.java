@@ -12,8 +12,8 @@ public class MainModule {
 
     public static void main(String[] args) {
         try {
-            String bigTxtFile = MainModule.class.getResource("/big.txt").getFile();
-            String stringsToFindFile = MainModule.class.getResource("/textsToFind.txt").getFile();
+            String bigTxtFile = MainModule.class.getResource("/big.txt").getFile().replaceAll("%20", " ");
+            String stringsToFindFile = MainModule.class.getResource("/textsToFind.txt").getFile().replaceAll("%20", " ");
             int numberOfLinesPerMatcher = 5000;
             logger.info("Looking for all words from file {}", stringsToFindFile);
             logger.info("Searching in {}", bigTxtFile);
